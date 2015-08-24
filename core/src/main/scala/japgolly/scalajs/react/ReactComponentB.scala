@@ -280,7 +280,8 @@ final class ReactComponentB[P,S,B,N <: TopNode](val name: String,
         lc.componentWillReceiveProps.foreach { f =>
           f(t, p.v).runNow()
         }
-        updateBackend(t, p)
+        val update = lc.shouldComponentUpdate.fold(true)(_.apply(t, p.v, t.state).runNow())
+        if (update) updateBackend(t, p)
       }
       spec.updateDynamic("componentWillReceiveProps")(willReceiveProps: ThisFunction)
 
