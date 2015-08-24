@@ -14,7 +14,7 @@ object BroadcasterTest extends TestSuite {
 
   val C = ReactComponentB[B]("")
     .initialState(Vector.empty[Int])
-    .backend(_ => new OnUnmount.Backend)
+    .backendNoProps(_ => new OnUnmount.Backend)
     .renderS((_, state) => <.div("Got: " + state.mkString("{",",","}")))
     .configure(Listenable.install(b => b, $ => (i: Int) => $.modState(_ :+ i)))
     .build

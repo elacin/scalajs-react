@@ -60,7 +60,7 @@ object RefsExample {
 
   val App = ReactComponentB[Unit]("App")
     .initialState("")
-    .backend(new Backend(_))
+    .backendNoProps(new Backend(_))
     .render($ =>
       <.div(
         <.div(

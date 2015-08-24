@@ -15,6 +15,7 @@ object Example {
   implicit private def auto2(v: SingleSide.Content): () => ReactElement = () => v()
 
   case object Hello        extends Example("Hello World",        "hello",            HelloMessageExample .content)
+  case object PropsU       extends Example("Props Update",       "propsupdate",      PropsUpdateExample  .content)
   case object Timer        extends Example("Timer",              "timer",            TimerExample        .content)
   case object Todo         extends Example(TodoExample.title,    "todo",             TodoExample         .content)
   case object StateMonad   extends Example("State monads",       "state-monad",      StateMonadExample   .content)
@@ -30,7 +31,7 @@ object Example {
   implicit val reusability: Reusability[Example] = Reusability.by_==
 
   val values = Vector[Example](
-    Hello, Timer, Todo, Refs, ProductTable, Animation, // Ported ReactJS examples
+    Hello, PropsU, Timer, Todo, Refs, ProductTable, Animation, // Ported ReactJS examples
     EventListen, ExternalVar, Reuse, StateMonad,       // Scala only examples
     Touch, PictureApp)                                 // General usage
 

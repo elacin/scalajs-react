@@ -14,7 +14,7 @@ object OnUnmountTest extends TestSuite {
 
   val C = ReactComponentB[Unit]("")
     .stateless
-    .backend(_ => new OnUnmount.Backend)
+    .backendNoProps(_ => new OnUnmount.Backend)
     .render(_ => <.div)
     .configure(OnUnmount.install)
     .componentDidMount(_.backend onUnmount dec_i)

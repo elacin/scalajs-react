@@ -70,7 +70,7 @@ object TodoExample {
 
   case class State(items: List[String], text: String)
 
-  class Backend($: BackendScope[Unit, State]) {
+  class Backend($: BackendScope[_, State]) {
     def onChange(e: ReactEventI) =
       $.modState(_.copy(text = e.target.value))
 
@@ -91,7 +91,7 @@ object TodoExample {
 
   val TodoApp = ReactComponentB[Unit]("TodoApp")
     .initialState(State(Nil, ""))
-    .backend(new Backend(_))
+    .backendNoProps(new Backend(_))
     .render(_.backend.render)
     .buildU
 

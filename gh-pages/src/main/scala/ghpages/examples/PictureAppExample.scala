@@ -132,7 +132,7 @@ object PictureAppExample {
 
   type PicClick = (String, Boolean) => Callback
 
-  class Backend($: BackendScope[Unit, State]) {
+  class Backend($: BackendScope[_, State]) {
 
     def onPicClick(id: String, favorite: Boolean) = {
       val s = $.state
@@ -192,7 +192,7 @@ object PictureAppExample {
 
   val PictureApp = ReactComponentB[Unit]("PictureApp")
     .initialState(State(Nil, Nil))
-    .backend(new Backend(_))
+    .backendNoProps(new Backend(_))
     .render(_.backend.render)
     .componentDidMount(scope => Callback {
     // make ajax call here to get pics from instagram

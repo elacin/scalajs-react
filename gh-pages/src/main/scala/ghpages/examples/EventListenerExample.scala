@@ -17,7 +17,7 @@ object EventListenerExample {
 
   val Main = ReactComponentB[Unit]("EventListener Example")
     .initialState("Local mouseenter events + local/global click events will appear here.")
-    .backend(new Backend(_))
+    .backendNoProps(new Backend(_))
     .render($ =>
       <.pre(
         ^.border  := "solid 1px black",
@@ -38,7 +38,7 @@ object EventListenerExample {
     )
     .buildU
 
-  class Backend($: BackendScope[Unit, String]) extends OnUnmount {
+  class Backend($: BackendScope[_, String]) extends OnUnmount {
     def logEvent(desc: String)       = $.modState(_ + "\n" + desc)
     def logMouseEnter(e: MouseEvent) = logEvent(s"Mouse enter @ ${e.pageX},${e.pageY}")
     val logWindowClick               = logEvent("Window clicked.")

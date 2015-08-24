@@ -42,7 +42,7 @@ object TimerExample {
 
   case class State(secondsElapsed: Long)
 
-  class Backend($: BackendScope[Unit, State]) {
+  class Backend($: BackendScope[_, State]) {
     var interval: js.UndefOr[js.timers.SetIntervalHandle] =
       js.undefined
 
@@ -61,7 +61,7 @@ object TimerExample {
 
   val Timer = ReactComponentB[Unit]("Timer")
     .initialState(State(0))
-    .backend(new Backend(_))
+    .backendNoProps(new Backend(_))
     .render($ => <.div("Seconds elapsed: ", $.state.secondsElapsed))
     .componentDidMount(_.backend.start)
     .componentWillUnmount(_.backend.clear)

@@ -13,7 +13,7 @@ object ExtrasExamples {
    */
   object OnUnmountExample {
 
-    class Backend($: BackendScope[Unit, Long]) extends OnUnmount {     // Extends OnUnmount
+    class Backend($: BackendScope[_, Long]) extends OnUnmount {     // Extends OnUnmount
                                                                        // Removed `var interval`
       def tick = $.modState(_ + 1)
 
@@ -28,7 +28,7 @@ object ExtrasExamples {
 
     val Timer = ReactComponentB[Unit]("Timer")
       .initialState(0L)
-      .backend(new Backend(_))
+      .backendNoProps(new Backend(_))
       .render_S(s => div("Seconds elapsed: ", s))
       .componentDidMount(_.backend.start)
                                                                     // Removed componentWillUnmount() call
@@ -48,7 +48,7 @@ object ExtrasExamples {
 
     val Timer = ReactComponentB[Unit]("Timer")
       .initialState(0L)
-      .backend(_ => new Backend)
+      .backendNoProps(_ => new Backend)
       .render_S(s => div("Seconds elapsed: ", s))
       .componentDidMount(c => c.backend.setInterval(c.modState(_ + 1), 1.second))
       .configure(SetInterval.install)
@@ -68,7 +68,7 @@ object ExtrasExamples {
                                                         // When an int is received, add to component state.
     val C = ReactComponentB[Listenable[Int]]("C")
       .initialState(0)
-      .backend(_ => new Backend)
+      .backendNoProps(_ => new Backend)
       .render_S(s => div("Total: ", s))
       .configure(Listenable.installS(identity, recv))   // Listen to events when mounted.
       .build

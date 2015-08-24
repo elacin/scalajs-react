@@ -16,7 +16,7 @@ object Router {
   def componentUnbuiltC[Page](baseUrl: BaseUrl, cfg: RouterConfig[Page], lgc: RouterLogic[Page]) =
     ReactComponentB[Unit]("Router")
       .initialStateCB    (           lgc.syncToWindowUrl)
-      .backend           (_       => new OnUnmount.Backend)
+      .backendNoProps    (_       => new OnUnmount.Backend)
       .render_S          (           lgc.render)
       .componentDidMount ($       => cfg.postRenderFn(None, $.state.page))
       .componentDidUpdate(($,_,p) => cfg.postRenderFn(Some(p.page), $.state.page))

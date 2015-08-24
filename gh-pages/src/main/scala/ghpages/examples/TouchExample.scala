@@ -31,7 +31,7 @@ object TouchExample {
   }
 
   /** Saving touch event details to state */
-  class Backend(val $: BackendScope[Unit, State]) {
+  class Backend(val $: BackendScope[_, State]) {
     def debugEvent(e: ReactTouchEvent): Callback =
       preventDefault(e) >> $.modState { state =>
         state withEntry s"${e.nativeEvent.`type`}: ${formatTouches(e.changedTouches)}" limit 10
@@ -50,7 +50,7 @@ object TouchExample {
   /** Rendering touch area and history of events */
   val TouchExampleApp = ReactComponentB[Unit]("TouchExample")
     .initialState(new State)
-    .backend(new Backend(_))
+    .backendNoProps(new Backend(_))
     .renderS { ($, s) =>
       val debugEvent = $.backend.debugEvent _
       <.div(

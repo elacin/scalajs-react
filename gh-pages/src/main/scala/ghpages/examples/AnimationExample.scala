@@ -57,7 +57,7 @@ object AnimationExample {
 
   // EXAMPLE:START
 
-  class Backend($: BackendScope[Unit, Vector[String]]) {
+  class Backend($: BackendScope[_, Vector[String]]) {
     def handleAdd =
       $.modState(_ :+ window.prompt("Enter some text"))
 
@@ -77,7 +77,7 @@ object AnimationExample {
 
   val TodoList = ReactComponentB[Unit]("TodoList")
     .initialState(Vector("hello", "world", "click", "me"))
-    .backend(new Backend(_))
+    .backendNoProps(new Backend(_))
     .render(_.backend.render)
     .buildU
 

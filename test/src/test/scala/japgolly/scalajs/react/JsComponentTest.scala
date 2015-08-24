@@ -16,7 +16,7 @@ object JsComponentTest extends TestSuite {
   val p2 = Ref[HTMLElement]("p2")
 
   // TODO Callback: review ↓
-  class XxxBackend(scope: BackendScope[Unit, Unit]) {
+  class XxxBackend(scope: BackendScope[_, Unit]) {
     def modifyOne(i: Int) = Callback {
       ref(scope).foreach(_.setNum(i))
     }
@@ -30,7 +30,7 @@ object JsComponentTest extends TestSuite {
     'jsComponentType {
       val component = ReactComponentB[Unit]("S").
         stateless.
-        backend(new XxxBackend(_)).
+        backendNoProps(new XxxBackend(_)).
         render(scope =>
         <.div(
           React.createFactory(SampleReactComponent)(SampleReactComponentProperty(ref = ref, propOne = "123")),

@@ -206,7 +206,7 @@ object ProductTableExample {
 
   val FilterableProductTable = ReactComponentB[List[Product]]("FilterableProductTable")
     .initialState(State("", false))
-    .backend(new Backend(_))
+    .backendNoProps(new Backend(_))
     .renderPS(($, p, s) =>
       <.div(
         SearchBar((s,$.backend)),

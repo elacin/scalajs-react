@@ -326,8 +326,8 @@ object CoreTest extends TestSuite {
     }
 
     'refs {
-      class WB(t: BackendScope[String,_]) { def getName = t.props }
-      val W = ReactComponentB[String]("").stateless.backend(new WB(_)).render_C(c => div(c)).build
+      case class WB(getName: String, t: BackendScope[_, _])
+      val W = ReactComponentB[String]("").stateless.backend(WB).render_C(c => div(c)).build
 
       // 'simple - simple refs are tested in TestTest
 
@@ -417,7 +417,7 @@ object CoreTest extends TestSuite {
       }
       val C = ReactComponentB[Unit]("C")
         .stateless
-        .backend(new RB(_))
+        .backendNoProps(new RB(_))
         .render(_ =>
           div(
             ReactCssTransitionGroup(name = "testname",ref = "addon")()

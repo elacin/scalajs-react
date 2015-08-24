@@ -63,7 +63,7 @@ object ReuseExample {
 
   val topLevelComponent = ReactComponentB[Unit]("Reusability example")
     .initialState(State(Vector(30, 0, 2, 0, 10)))
-    .backend(new Backend(_))
+    .backendNoProps(new Backend(_))
     .render(_.backend.render)
     .buildU
 
@@ -84,7 +84,7 @@ object ReuseExample {
     val sum = inputs.sum
   }
 
-  class Backend($: BackendScope[Unit, State]) {
+  class Backend($: BackendScope[_, State]) {
     val changeFn   = ReusableFn($).modState.endoCall(_.changeNumberOfInputs)
     val setInputFn = ReusableFn($).modState.endoCall2(_.setInput)
 

@@ -38,7 +38,7 @@ object ReusabilityTest extends TestSuite {
 
     val outerComponent = ReactComponentB[M]("Demo")
       .initialState_P(identity)
-      .backend(new Backend(_))
+      .backendNoProps(new Backend(_))
       .render(_.backend.render)
       .build
 
