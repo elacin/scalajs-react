@@ -132,7 +132,7 @@ object PictureAppExample {
 
   type PicClick = (String, Boolean) => Callback
 
-  class Backend($: BackendScope[_, State]) {
+  class Backend($: BackendScope[Nothing, State]) {
 
     def onPicClick(id: String, favorite: Boolean) = {
       val s = $.state

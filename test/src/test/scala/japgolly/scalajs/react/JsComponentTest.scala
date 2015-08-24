@@ -16,7 +16,7 @@ object JsComponentTest extends TestSuite {
   val p2 = Ref[HTMLElement]("p2")
 
   // TODO Callback: review ↓
-  class XxxBackend(scope: BackendScope[_, Unit]) {
+  class XxxBackend(scope: BackendScope[Nothing, Unit]) {
     def modifyOne(i: Int) = Callback {
       ref(scope).foreach(_.setNum(i))
     }

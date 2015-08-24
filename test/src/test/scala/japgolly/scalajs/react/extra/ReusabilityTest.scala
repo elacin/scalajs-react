@@ -42,7 +42,7 @@ object ReusabilityTest extends TestSuite {
       .render(_.backend.render)
       .build
 
-    class Backend($: BackendScope[_, M]) {
+    class Backend($: BackendScope[Nothing, M]) {
       val updateUser = ReusableFn((id: Int, data: String) =>
         $.modState(_.updated(id, data)))
       def render = {

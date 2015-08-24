@@ -13,7 +13,7 @@ object ExtrasExamples {
    */
   object OnUnmountExample {
 
-    class Backend($: BackendScope[_, Long]) extends OnUnmount {     // Extends OnUnmount
+    class Backend($: BackendScope[Nothing, Long]) extends OnUnmount {     // Extends OnUnmount
                                                                        // Removed `var interval`
       def tick = $.modState(_ + 1)
 

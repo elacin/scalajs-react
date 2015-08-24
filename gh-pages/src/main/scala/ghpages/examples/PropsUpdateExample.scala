@@ -12,7 +12,7 @@ object PropsUpdateExample {
   lazy val main = addIntro(Outer, identity)
   
   case class InnerProps(onIncrement: Callback, onRefresh: Callback, i: Int)
-  case class InnerBackend(p: InnerProps, $: BackendScope[_, Unit]){
+  case class InnerBackend(p: InnerProps, $: BackendScope[Nothing, Unit]){
     println(s"Initialized InnerBackend($p, ${$})")
     val incrementBtn = <.button("increment " + p.i.toString, ^.onClick --> p.onIncrement)
     val refreshBtn   = <.button("refresh", ^.onClick --> p.onRefresh)
@@ -26,7 +26,7 @@ object PropsUpdateExample {
     .configure(Reusability.shouldComponentUpdate)
     .build
 
-  case class OuterBackend($: BackendScope[_, Int]){
+  case class OuterBackend($: BackendScope[Nothing, Int]){
     val increment = $.modState(1 +)
     val refresh   = $.modState(0 +)
   }

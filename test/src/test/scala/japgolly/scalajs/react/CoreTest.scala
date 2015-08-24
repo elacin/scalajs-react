@@ -326,7 +326,7 @@ object CoreTest extends TestSuite {
     }
 
     'refs {
-      case class WB(getName: String, t: BackendScope[_, _])
+      case class WB(getName: String, t: BackendScope[Nothing, _])
       val W = ReactComponentB[String]("").stateless.backend(WB).render_C(c => div(c)).build
 
       // 'simple - simple refs are tested in TestTest
@@ -409,7 +409,7 @@ object CoreTest extends TestSuite {
     }
 
     'refToThirdPartyComponents {
-      class RB(t:BackendScope[_,_]) {
+      class RB(t:BackendScope[Nothing,_]) {
         def test = Callback {
           val transitionRef = Ref.toJS[ReactCssTransitionGroupM]("addon")(t)
           assert(transitionRef.isDefined)

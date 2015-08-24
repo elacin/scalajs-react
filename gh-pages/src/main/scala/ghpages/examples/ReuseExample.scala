@@ -84,7 +84,7 @@ object ReuseExample {
     val sum = inputs.sum
   }
 
-  class Backend($: BackendScope[_, State]) {
+  class Backend($: BackendScope[Nothing, State]) {
     val changeFn   = ReusableFn($).modState.endoCall(_.changeNumberOfInputs)
     val setInputFn = ReusableFn($).modState.endoCall2(_.setInput)
 

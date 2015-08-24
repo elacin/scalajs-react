@@ -26,7 +26,7 @@ object ReactComponentB {
   implicit def defaultPropsRequired[P,S,B,N<:TopNode,X <% ReactComponentB[P,S,B,N]](x: X) = x.propsRequired
 
   type InitStateFn[P, S] = DuringCallbackU[P, S, Any] => CallbackTo[S]
-  type InitBackendFn[P, S, B] = (P, BackendScope[_, S]) => B
+  type InitBackendFn[P, S, B] = (P, BackendScope[Nothing, S]) => B
   type RenderFn[P, S, -B] = DuringCallbackU[P, S, B] => ReactElement
 
   // ===================================================================================================================
@@ -62,8 +62,8 @@ object ReactComponentB {
   final class PS[P, S] private[ReactComponentB](name: String, initF: InitStateFn[P, S]) {
     def backend[B] (f: InitBackendFn[P, S, B]) = new PSB(name, initF, f)
     def noBackend                              = backend((_, _) => ())
-    def backendNoProps[B](f: BackendScope[_, S] ⇒ B) =
-      backend((p: P, $: BackendScope[_, S]) ⇒ f($))
+    def backendNoProps[B](f: BackendScope[Nothing, S] ⇒ B) =
+      backend((p: P, $: BackendScope[Nothing, S]) ⇒ f($))
   }
 
   // ===================================================================================================================
@@ -255,7 +255,7 @@ final class ReactComponentB[P,S,B,N <: TopNode](val name: String,
         }
 
       def updateBackend(t: AnyUnmounted[P, S, B], newProps: P) = {
-        val scopeB = t.asInstanceOf[BackendScope[P, S]]
+        val scopeB = t.asInstanceOf[BackendScope[Nothing, S]]
         t.asInstanceOf[Dynamic].updateDynamic("backend")(backF(newProps, scopeB).asInstanceOf[JAny])
       }
 

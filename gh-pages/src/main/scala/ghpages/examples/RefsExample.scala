@@ -51,7 +51,7 @@ object RefsExample {
 
   val theInput = Ref[HTMLInputElement]("theInput")
 
-  class Backend($: BackendScope[_, String]) {
+  class Backend($: BackendScope[Nothing, String]) {
     def handleChange(e: ReactEventI) =
       $.setState(e.target.value)
     def clearAndFocusInput() =

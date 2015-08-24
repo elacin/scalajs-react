@@ -42,7 +42,7 @@ object TimerExample {
 
   case class State(secondsElapsed: Long)
 
-  class Backend($: BackendScope[_, State]) {
+  class Backend($: BackendScope[Nothing, State]) {
     var interval: js.UndefOr[js.timers.SetIntervalHandle] =
       js.undefined
 

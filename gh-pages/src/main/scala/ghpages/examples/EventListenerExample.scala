@@ -38,7 +38,7 @@ object EventListenerExample {
     )
     .buildU
 
-  class Backend($: BackendScope[_, String]) extends OnUnmount {
+  class Backend($: BackendScope[Nothing, String]) extends OnUnmount {
     def logEvent(desc: String)       = $.modState(_ + "\n" + desc)
     def logMouseEnter(e: MouseEvent) = logEvent(s"Mouse enter @ ${e.pageX},${e.pageY}")
     val logWindowClick               = logEvent("Window clicked.")

@@ -149,7 +149,7 @@ object ProductTableExample {
 
   case class State(filterText: String, inStockOnly: Boolean)
 
-  class Backend($: BackendScope[_, State])  {
+  class Backend($: BackendScope[Nothing, State])  {
     def onTextChange(e: ReactEventI) =
       $.modState(_.copy(filterText = e.target.value))
     def onCheckBox(e: ReactEvent) =

@@ -57,7 +57,7 @@ object AnimationExample {
 
   // EXAMPLE:START
 
-  class Backend($: BackendScope[_, Vector[String]]) {
+  class Backend($: BackendScope[Nothing, Vector[String]]) {
     def handleAdd =
       $.modState(_ :+ window.prompt("Enter some text"))
 

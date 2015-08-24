@@ -70,7 +70,7 @@ object TodoExample {
 
   case class State(items: List[String], text: String)
 
-  class Backend($: BackendScope[_, State]) {
+  class Backend($: BackendScope[Nothing, State]) {
     def onChange(e: ReactEventI) =
       $.modState(_.copy(text = e.target.value))
 
