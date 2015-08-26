@@ -72,6 +72,12 @@ object ReactComponentB {
     def render(f: DuringCallbackU[P, S, B] => ReactElement): PSBR[P, S, B] =
       new PSBR(name, initF, backF, f)
 
+    def renderR(f: (P, S, B) => ReactElement): PSBR[P, S, B] =
+      render($ ⇒ f($.props, $.state, $.backend))
+
+    def renderRC(f: (P, S, B, PropsChildren) => ReactElement): PSBR[P, S, B] =
+      render($ ⇒ f($.props, $.state, $.backend, $.propsChildren))
+
     def renderPCS(f: (DuringCallbackU[P, S, B], P, PropsChildren, S) => ReactElement): PSBR[P, S, B] =
       render($ => f($, $.props, $.propsChildren, $.state))
 
