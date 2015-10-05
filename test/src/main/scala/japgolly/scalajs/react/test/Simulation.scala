@@ -1,5 +1,7 @@
 package japgolly.scalajs.react.test
 
+import japgolly.scalajs.react.CallbackOption
+
 import scala.scalajs.js.Object
 import ReactTestUtils.Simulate
 
@@ -10,6 +12,9 @@ class Simulation(_run: (() => ReactOrDomNode) => Unit) {
 
   def run(n: => ReactOrDomNode): Unit =
     _run(() => n)
+
+  def run[T](cbn: => CallbackOption[T])(implicit ev: T ⇒ ReactOrDomNode): Unit =
+    cbn.map(n ⇒ run(ev(n))).runNow()
 
   def andThen(f: Simulation) =
     new Simulation(n => { _run(n); f.run(n()) })

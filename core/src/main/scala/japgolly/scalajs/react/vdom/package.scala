@@ -19,7 +19,7 @@ package object vdom {
 
   // If you're wondering why abstract class instead of trait, https://issues.scala-lang.org/browse/SI-4767
   abstract class Base extends Implicits {
-    final type ReactTag = japgolly.scalajs.react.vdom.ReactTag
+    final type ReactTag = japgolly.scalajs.react.vdom.ReactTagOf[TopNode]
     final type TagMod   = japgolly.scalajs.react.vdom.TagMod
     @inline final def TagMod   = japgolly.scalajs.react.vdom.TagMod
     @inline final def EmptyTag = japgolly.scalajs.react.vdom.EmptyTag
@@ -28,7 +28,6 @@ package object vdom {
   object all extends Base with Tags with Attrs {
     object svg extends SvgTags with SvgAttrs
     @inline def keyAttr = key
-    @inline def refAttr = ref
   }
 
   object prefix_<^ extends Base {

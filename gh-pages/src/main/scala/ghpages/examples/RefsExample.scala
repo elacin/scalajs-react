@@ -52,22 +52,21 @@ object RefsExample {
 
   // EXAMPLE:START
 
-  val theInput = Ref[HTMLInputElement]("theInput")
+  val theInput = RefHolder[ReactComponentM_[HTMLInputElement]]
 
   class Backend($: BackendScope[Unit, String]) {
     def handleChange(e: ReactEventI) =
       $.setState(e.target.value)
 
     def clearAndFocusInput() =
-      $.setState("", theInput($).tryFocus)
+      $.setState("", theInput().tryFocus)
 
     def render(state: String) =
       <.div(
         <.div(
           ^.onClick --> clearAndFocusInput,
           "Click to Focus and Reset"),
-        <.input(
-          ^.ref       := theInput,
+        <.input.withRef(theInput.set)(
           ^.value     := state,
           ^.onChange ==> handleChange))
   }

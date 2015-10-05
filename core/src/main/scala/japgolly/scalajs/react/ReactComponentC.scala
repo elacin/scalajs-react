@@ -11,6 +11,7 @@ sealed trait ReactComponentC[P, S, B, N <: TopNode] extends ReactComponentTypeAu
 }
 
 object ReactComponentC {
+  type Ref[P, S, B, N <: TopNode] = ReactComponentM[P, S, B, N] ⇒ Unit
 
   sealed abstract class BaseCtor[P, S, B, N <: TopNode] extends ReactComponentC[P, S, B, N] {
 
@@ -18,12 +19,12 @@ object ReactComponentC {
     type This <: BaseCtor[P, S, B, N]
 
     protected val key: UndefOr[JAny]
-    protected val ref: UndefOr[String]
+    protected val ref: UndefOr[Ref[P, S, B, N]]
 
-    def set(key: UndefOr[JAny] = this.key, ref: UndefOr[String] = this.ref): This
+    def set(key: UndefOr[JAny] = this.key, ref: UndefOr[Ref[P, S, B, N]] = this.ref): This
 
-    final def withKey(k: JAny)  : This = set(key = k)
-    final def withRef(r: String): This = set(ref = r)
+    final def withKey(k: JAny): This            = set(key = k)
+    final def withRef(r: Ref[P, S, B, N]): This = set(ref = r)
 
     protected def mkProps(props: P): WrapObj[P] = {
       val j = WrapObj(props)
@@ -39,9 +40,9 @@ object ReactComponentC {
   final class ReqProps[P, S, B, N <: TopNode](override val jsCtor: ReactComponentCU[P, S, B, N],
                                                 override val reactClass: ReactClass[P, S, B, N],
                                                 override protected val key: UndefOr[JAny],
-                                                override protected val ref: UndefOr[String]) extends BaseCtor[P, S, B, N] {
+                                                override protected val ref: UndefOr[Ref[P, S, B, N]]) extends BaseCtor[P, S, B, N] {
     override type This = ReqProps[P, S, B, N]
-    def set(key: UndefOr[JAny] = this.key, ref: UndefOr[String] = this.ref): This =
+    override def set(key: UndefOr[JAny] = this.key, ref: UndefOr[Ref[P, S, B, N]] = this.ref): This =
       new ReqProps(jsCtor, reactClass, key, ref)
 
     def apply(props: P, children: ReactNode*) = jsCtor(mkProps(props), children: _*)
@@ -62,10 +63,10 @@ object ReactComponentC {
   final class DefaultProps[P, S, B, N <: TopNode](override val jsCtor: ReactComponentCU[P, S, B, N],
                                                     override val reactClass: ReactClass[P, S, B, N],
                                                     override protected val key: UndefOr[JAny],
-                                                    override protected val ref: UndefOr[String],
+                                                    override protected val ref: UndefOr[Ref[P, S, B, N]],
                                                     default: () => P) extends BaseCtor[P, S, B, N] {
     override type This = DefaultProps[P, S, B, N]
-    def set(key: UndefOr[JAny] = this.key, ref: UndefOr[String] = this.ref): This =
+    override def set(key: UndefOr[JAny] = this.key, ref: UndefOr[Ref[P, S, B, N]] = this.ref): This =
       new DefaultProps(jsCtor, reactClass, key, ref, default)
 
     def apply(props: Option[P], children: ReactNode*): ReactComponentU[P,S,B,N] =
@@ -81,10 +82,10 @@ object ReactComponentC {
   final class ConstProps[P, S, B, N <: TopNode](override val jsCtor: ReactComponentCU[P, S, B, N],
                                                   override val reactClass: ReactClass[P, S, B, N],
                                                   override protected val key: UndefOr[JAny],
-                                                  override protected val ref: UndefOr[String],
+                                                  override protected val ref: UndefOr[Ref[P, S, B, N]],
                                                   props: () => P) extends BaseCtor[P, S, B, N] {
     override type This = ConstProps[P, S, B, N]
-    def set(key: UndefOr[JAny] = this.key, ref: UndefOr[String] = this.ref): This =
+    override def set(key: UndefOr[JAny] = this.key, ref: UndefOr[Ref[P, S, B, N]] = this.ref): This =
       new ConstProps(jsCtor, reactClass, key, ref, props)
 
     def apply(children: ReactNode*) = jsCtor(mkProps(props()), children: _*)

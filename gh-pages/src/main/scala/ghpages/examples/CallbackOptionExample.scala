@@ -37,11 +37,10 @@ object CallbackOptionExample {
 
   def initState = State((OuterX - InnerSize) / 2, (OuterY - InnerSize) / 2)
 
-  val OuterRef = Ref[TopNode]("o")
+  val OuterRef = RefHolder[ReactComponentM_[TopNode]]
 
   val OuterDiv =
-    <.div(
-      ^.ref        := OuterRef,
+    <.div.withRef(OuterRef.set)(
       ^.tabIndex   := 0,
       ^.width      := OuterX,
       ^.height     := OuterY,
@@ -60,7 +59,7 @@ object CallbackOptionExample {
 
   class Backend($: BackendScope[Unit, State]) {
     def init: Callback =
-      OuterRef($).tryFocus
+      OuterRef().tryFocus
 
     def move(dx: Int, dy: Int): Callback =
       $.modState(s => s.copy(

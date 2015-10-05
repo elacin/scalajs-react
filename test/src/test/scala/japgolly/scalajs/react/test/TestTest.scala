@@ -13,11 +13,11 @@ object TestTest extends TestSuite {
   lazy val B = ReactComponentB[Unit]("B").render(_ => p(cls := "BB", "hehehe")).buildU
   lazy val rab = ReactTestUtils.renderIntoDocument(A(B()))
 
-  val inputRef = Ref[HTMLInputElement]("r")
+  val inputRef = RefHolder[ReactComponentM_[HTMLInputElement]]
   lazy val IC = ReactComponentB[Unit]("IC").initialState(true).renderS(($,s) => {
     val ch = (e: ReactEvent) => $.modState(x => !x)
     label(
-      input(`type` := "checkbox", checked := s, onClick ==> ch, ref := inputRef),
+      input.withRef(inputRef.set)(`type` := "checkbox", checked := s, onClick ==> ch),
       span(s"s = $s")
     )
   }).buildU
@@ -58,10 +58,10 @@ object TestTest extends TestSuite {
     'Simulate {
       'click {
         val c = ReactTestUtils.renderIntoDocument(IC())
-        val i = inputRef(c).get
+        val i = inputRef()
         val s = ReactTestUtils.findRenderedDOMComponentWithTag(c, "span")
         val a = s.getDOMNode().innerHTML
-        ReactTestUtils.Simulate.click(i)
+        i.map(r ⇒ ReactTestUtils.Simulate.click(r)).runNow()
         val b = s.getDOMNode().innerHTML
         assert(a != b)
       }
@@ -102,7 +102,7 @@ object TestTest extends TestSuite {
             val IDC = ReactComponentB[Unit]("IC").initialState(true).render($ => {
               val ch = (e: ReactEvent) => $.modState(x => !x)
               label(
-                input(`type` := "text", value := $.state, eventType ==> ch, ref := inputRef),
+                input.withRef(inputRef.set)(`type` := "text", value := $.state, eventType ==> ch),
                 span(s"s = ${$.state}")
               )
             }).buildU
@@ -111,7 +111,7 @@ object TestTest extends TestSuite {
             val s = ReactTestUtils.findRenderedDOMComponentWithTag(c, "span")
 
             val a = s.getDOMNode().innerHTML
-            simF(inputRef(c).get)
+            inputRef().map(r ⇒ simF(r)).runNow()
             val b = s.getDOMNode().innerHTML
 
             (eventType, a != b)
@@ -136,13 +136,13 @@ object TestTest extends TestSuite {
           def e(s: String) = Callback(events :+= s)
           def chg(ev: ReactEventI) =
             e("change") >> T.setState(ev.target.value)
-          input(value := T.state, ref := inputRef, onFocus --> e("focus"), onChange ==> chg, onBlur --> e("blur"))
+          input.withRef(inputRef.set)(value := T.state, onFocus --> e("focus"), onChange ==> chg, onBlur --> e("blur"))
         }).buildU
         val c = ReactTestUtils.renderIntoDocument(C())
-        val i = inputRef(c).get
+        val i = inputRef()
         Simulation.focusChangeBlur("good") run i
         events mustEqual Vector("focus", "change", "blur")
-        i.getDOMNode().value mustEqual "good"
+        i.map(_.getDOMNode().value).get.runNow() mustEqual Some("good")
       }
       'targetByName {
         val c = ReactTestUtils.renderIntoDocument(IC())

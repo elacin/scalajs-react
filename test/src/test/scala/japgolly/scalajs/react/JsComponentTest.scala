@@ -1,8 +1,8 @@
 package japgolly.scalajs.react
 
-import japgolly.scalajs.react._
 import japgolly.scalajs.react.test.{Simulation, ReactTestUtils}
 import japgolly.scalajs.react.vdom.prefix_<^._
+import org.scalajs.dom.html
 import org.scalajs.dom.raw.HTMLElement
 import utest.framework.TestSuite
 import utest._
@@ -11,19 +11,17 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.JSName
 
 object JsComponentTest extends TestSuite {
-  val ref = Ref.toJS[SampleReactComponentM]("ref123")
-  val p1 = Ref[HTMLElement]("p1")
-  val p2 = Ref[HTMLElement]("p2")
+  val ref = RefHolder[SampleReactComponentM]
+  val p1  = RefHolder[ReactComponentM_[html.Paragraph]]
+  val p2  = RefHolder[ReactComponentM_[html.Paragraph]]
 
   // TODO Callback: review ↓
   class XxxBackend(scope: BackendScope[Unit, Unit]) {
-    def modifyOne(i: Int) = Callback {
-      ref(scope).foreach(_.setNum(i))
-    }
+    def modifyOne(i: Int): Callback =
+      ref().map(_.setNum(i))
 
-    def modifyTwo(i: Int) = Callback {
-      ref(scope).foreach(c => c.setState(SampleReactComponentState(c.state)(num2 = i)))
-    }
+    def modifyTwo(i: Int): Callback =
+      ref().map(c => c.setState(SampleReactComponentState(c.state)(num2 = i)))
   }
 
   def tests = TestSuite {
@@ -33,38 +31,44 @@ object JsComponentTest extends TestSuite {
         backend(new XxxBackend(_)).
         render(scope =>
         <.div(
-          React.createFactory(SampleReactComponent)(SampleReactComponentProperty(ref = ref, propOne = "123")),
-          <.p(^.ref := p1, ^.onClick --> scope.backend.modifyOne(10)),
-          <.p(^.ref := p2, ^.onClick --> scope.backend.modifyTwo(20))
+          React.createFactory(SampleReactComponent)(SampleReactComponentProperty(ref = ref.set, propOne = "123")),
+          <.p.withRef(p1.set)(^.onClick --> scope.backend.modifyOne(10)),
+          <.p.withRef(p2.set)(^.onClick --> scope.backend.modifyTwo(20))
         )).buildU
       val renderedComponent = ReactTestUtils.renderIntoDocument(component())
-      val mountedComponent = ref(renderedComponent)
-      assert(mountedComponent.map(_.getDOMNode()).map(_.tagName).map(_.toLowerCase).toOption == Some("div"))
-      assert(mountedComponent.map(_.getDOMNode()).map(_.outerHTML).filter(_.contains("123")).isDefined)
-      assert(mountedComponent.map(_.props).flatMap(_.propOne).toOption == Some("123"))
-      assert(mountedComponent.map(_.getNum()).toOption == Some(0))
-      assert(mountedComponent.map(_.state.num).toOption == Some(0))
-      assert(mountedComponent.map(_.state.num2).toOption == Some(0))
-      mountedComponent.foreach(_.setNum(2))
-      assert(mountedComponent.map(_.getNum()).toOption == Some(2))
-      assert(mountedComponent.map(_.state.num).toOption == Some(2))
-      assert(mountedComponent.map(_.state.num2).toOption == Some(0))
-      mountedComponent.map(c => c.setState(SampleReactComponentState(c.state)(num2 = 1)))
-      assert(mountedComponent.map(_.getNum()).toOption == Some(2))
-      assert(mountedComponent.map(_.state.num).toOption == Some(2))
-      assert(mountedComponent.map(_.state.num2).toOption == Some(1))
-      mountedComponent.map(c => c.setState(SampleReactComponentState(c.state)(num = 3, num2 = 2)))
-      assert(mountedComponent.map(_.getNum()).toOption == Some(3))
-      assert(mountedComponent.map(_.state.num).toOption == Some(3))
-      assert(mountedComponent.map(_.state.num2).toOption == Some(2))
-      Simulation(ReactTestUtils.Simulate.click(_)).run(p1(renderedComponent))
-      assert(mountedComponent.map(_.getNum()).toOption == Some(10))
-      assert(mountedComponent.map(_.state.num).toOption == Some(10))
-      assert(mountedComponent.map(_.state.num2).toOption == Some(2))
-      Simulation(ReactTestUtils.Simulate.click(_)).run(p2(renderedComponent))
-      assert(mountedComponent.map(_.getNum()).toOption == Some(10))
-      assert(mountedComponent.map(_.state.num).toOption == Some(10))
-      assert(mountedComponent.map(_.state.num2).toOption == Some(20))
+      val mountedComponent = ref()
+
+      assert(mountedComponent.map(_.getDOMNode()).map(_.tagName).map(_.toLowerCase).get.runNow() == Some("div"))
+      assert(mountedComponent.map(_.getDOMNode()).map(_.outerHTML).filter(_.contains("123")).get.runNow().isDefined)
+      assert(mountedComponent.map(_.props).map(_.propOne).get.runNow() == Some("123"))
+      assert(mountedComponent.map(_.getNum()).get.runNow() == Some(0))
+      assert(mountedComponent.map(_.state.num).get.runNow() == Some(0))
+      assert(mountedComponent.map(_.state.num2).get.runNow() == Some(0))
+
+      mountedComponent.map(_.setNum(2)).runNow()
+      assert(mountedComponent.map(_.getNum()).get.runNow() == Some(2))
+      assert(mountedComponent.map(_.state.num).get.runNow() == Some(2))
+      assert(mountedComponent.map(_.state.num2).get.runNow() == Some(0))
+
+      mountedComponent.map(c => c.setState(SampleReactComponentState(c.state)(num2 = 1))).runNow()
+      assert(mountedComponent.map(_.getNum()).get.runNow() == Some(2))
+      assert(mountedComponent.map(_.state.num).get.runNow() == Some(2))
+      assert(mountedComponent.map(_.state.num2).get.runNow() == Some(1))
+
+      mountedComponent.map(c => c.setState(SampleReactComponentState(c.state)(num = 3, num2 = 2))).runNow()
+      assert(mountedComponent.map(_.getNum()).get.runNow() == Some(3))
+      assert(mountedComponent.map(_.state.num).get.runNow() == Some(3))
+      assert(mountedComponent.map(_.state.num2).get.runNow() == Some(2))
+
+      Simulation(ReactTestUtils.Simulate.click(_)).run(p1())
+      assert(mountedComponent.map(_.getNum()).get.runNow() == Some(10))
+      assert(mountedComponent.map(_.state.num).get.runNow() == Some(10))
+      assert(mountedComponent.map(_.state.num2).get.runNow() == Some(2))
+
+      Simulation(ReactTestUtils.Simulate.click(_)).run(p2())
+      assert(mountedComponent.map(_.getNum()).get.runNow() == Some(10))
+      assert(mountedComponent.map(_.state.num).get.runNow() == Some(10))
+      assert(mountedComponent.map(_.state.num2).get.runNow() == Some(20))
     }
   }
 }
@@ -79,7 +83,7 @@ trait SampleReactComponentState extends js.Object {
 }
 
 object SampleReactComponentProperty {
-  def apply(ref: js.UndefOr[String] = js.undefined, propOne: js.UndefOr[String] = js.undefined): SampleReactComponentProperty = {
+  def apply(ref: js.UndefOr[SampleReactComponentM => Unit] = js.undefined, propOne: js.UndefOr[String] = js.undefined): SampleReactComponentProperty = {
     val p = js.Dynamic.literal()
 
     ref.foreach(p.updateDynamic("ref")(_))

@@ -13,12 +13,13 @@ object Addons {
       React.createFactory(
         React.addons.CSSTransitionGroup.asInstanceOf[JsComponentType[js.Any, js.Any, TopNode]])
   }
+  trait ReactCssTransitionGroupM extends js.Object
 
   case class ReactCssTransitionGroup(name     : String,
                                      enter    : js.UndefOr[Boolean] = js.undefined,
                                      leave    : js.UndefOr[Boolean] = js.undefined,
                                      component: js.UndefOr[String]  = js.undefined,
-                                     ref      : js.UndefOr[String]  = js.undefined) {
+                                     ref      : js.UndefOr[ReactCssTransitionGroupM => Unit]  = js.undefined) {
     def toJs: js.Object = {
       val p = js.Dynamic.literal("transitionName" -> name)
       enter    .foreach(p.updateDynamic("transitionEnter")(_))

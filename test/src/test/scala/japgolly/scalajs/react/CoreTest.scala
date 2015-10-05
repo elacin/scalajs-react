@@ -1,6 +1,6 @@
 package japgolly.scalajs.react
 
-import japgolly.scalajs.react.Addons.{ReactCssTransitionGroup, ReactCloneWithProps}
+import japgolly.scalajs.react.Addons.{ReactCssTransitionGroupM, ReactCssTransitionGroup, ReactCloneWithProps}
 import monocle.macros.Lenses
 import utest._
 import scala.scalajs.js, js.{Array => JArray}
@@ -29,8 +29,6 @@ object CoreTest extends TestSuite {
   val tagmod  : TagMod       = cls := "ho"
   val reacttag: ReactTag     = span()
   val relement: ReactElement = span()
-
-  trait ReactCssTransitionGroupM extends js.Object
 
   @Lenses
   case class StrInt(str: String, int: Int)
@@ -335,72 +333,87 @@ object CoreTest extends TestSuite {
 
     'refs {
       class WB(t: BackendScope[String,_]) { def getName = t.props.runNow() }
+      type W = ReactComponentM[String, Unit, WB, TopNode]
       val W = ReactComponentB[String]("").stateless.backend(new WB(_)).render_C(c => div(c)).build
 
       // 'simple - simple refs are tested in TestTest
 
       'parameterised {
-        val r = Ref.param[Int, TopNode](i => s"ref-$i")
-        val C = ReactComponentB[Unit]("").render(_ => div(p(ref := r(1), "One"), p(ref := r(2), "Two"))).buildU
+        val r = (0 to 3).map(_ => RefHolder[ReactComponentM_[HTMLParagraphElement]])
+        val C = ReactComponentB[Unit]("").render(_ => div(p.withRef(r(1).set)( "One"), p.withRef(r(2).set)("Two"))).buildU
         val c = ReactTestUtils.renderIntoDocument(C())
-        r(1)(c).get.getDOMNode().innerHTML mustEqual "One"
-        r(2)(c).get.getDOMNode().innerHTML mustEqual "Two"
-        assert(r(3)(c).isEmpty)
+        val t1 = r(1)().map(_.getDOMNode().innerHTML mustEqual "One")
+        val t2 = r(2)().map(_.getDOMNode().innerHTML mustEqual "Two")
+        val t3 = r(3)().toCallbackB.map(exists => assert(!exists))
+        t1 >> t2 >> t3
       }
 
       'onOwnedComponenets {
-        val innerRef = Ref.to(W, "inner")
-        val outerRef = Ref.to(W, "outer")
+        var innerRef = RefHolder[W]
+        var outerRef = RefHolder[W]
         val innerWName = "My name is IN"
         val outerWName = "My name is OUT"
         var tested = false
         val C = ReactComponentB[Unit]("")
           .render(P => {
-            val inner = W.set(ref = innerRef)(innerWName)
-            val outer = W.set(ref = outerRef)(outerWName, inner)
+            val inner = W.withRef(innerRef.set)(innerWName)
+            val outer = W.withRef(outerRef.set)(outerWName, inner)
             div(outer)
-           })
-          .componentDidMount(scope => Callback {
-            innerRef(scope).get.backend.getName mustEqual innerWName
-            outerRef(scope).get.backend.getName mustEqual outerWName
-            tested = true
-          })
-          .buildU
+           }).buildU
+
         ReactTestUtils renderIntoDocument C()
+
+        val c: Callback =
+          innerRef().map(_.backend.getName mustEqual innerWName) >>
+          outerRef().map(_.backend.getName mustEqual outerWName) >>
+          Callback(tested = true)
+
+        c.runNow()
+
         assert(tested) // just in case
       }
 
       'shouldNotHaveRefsOnUnmountedComponents {
+        var ref: js.UndefOr[ReactComponentM_[dom.html.Div]] = js.undefined
         val C = ReactComponentB[Unit]("child").render(_ => div()).buildU
         val P = ReactComponentB[Unit]("parent")
-          .render(P => C(div(ref := "test"))) // div here discarded by C.render
-          .componentDidMount(scope => Callback(assert(scope.refs("test").get == null)))
+          .render(P => C(div.withRef(c => ref = c)))
+          .componentDidMount(scope => Callback(assert(ref.isEmpty)))
       }
 
       'refToThirdPartyComponents {
-        class RB($: BackendScope[_, _]) {
-          def test = Callback {
-            val transitionRef = Ref.toJS[ReactCssTransitionGroupM]("addon")($)
-            assert(transitionRef.isDefined)
-          }
+        class RB(t:BackendScope[_,_]) {
+          val addonRef = RefHolder[ReactCssTransitionGroupM]
+          val test: Callback = addonRef().toCallbackB.map(assert(_))
         }
+
         val C = ReactComponentB[Unit]("C")
           .backend(new RB(_))
-          .render(_ => div(ReactCssTransitionGroup(name = "testname", ref = "addon")()))
+          .render($ => div(ReactCssTransitionGroup(name = "testname", ref = $.backend.addonRef.set)()))
           .componentDidMount(_.backend.test)
           .buildU
         ReactTestUtils renderIntoDocument C()
       }
 
+
+      'passCallbackTo {
+        var ref: js.UndefOr[HTMLDivElement]= js.undefined
+        val C = ReactComponentB[Unit]("C")
+          .render(_ => div.withRef(t ⇒ ref = t.getDOMNode())("Hola"))
+          .buildU
+        ReactTestUtils renderIntoDocument C()
+        assert(ref.get.textContent == "Hola")
+      }
+
       // Added in React 0.13
       'passCallback {
-        var i: js.UndefOr[HTMLInputElement] = js.undefined
+        var i: js.UndefOr[ReactComponentM_[HTMLInputElement]] = js.undefined
         val C = ReactComponentB[Unit]("C")
-          .render(_ => div(input(value := "yay", ref[HTMLInputElement](r => i = r.getDOMNode()))))
+          .render(_ => div(input.withRef(c => i = c)(value := "yay")))
           .buildU
         ReactTestUtils renderIntoDocument C()
         assert(i.isDefined)
-        assert(i.get.value == "yay")
+        assert(i.get.getDOMNode().value == "yay")
       }
     }
 
