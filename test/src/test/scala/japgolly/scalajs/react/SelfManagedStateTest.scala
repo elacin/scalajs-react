@@ -6,20 +6,17 @@ import japgolly.scalajs.react._, vdom.prefix_<^._, ScalazReact._, MonocleReact._
 import japgolly.scalajs.react.extra._
 import japgolly.scalajs.react.test._
 import TestUtil2._
-import CompScope.DuringCallbackU
+import CompScope.AnyInitializing
 
 object SelfManagedStateTest extends TestSuite {
 
   // Heavily trimmed-down version of something more useful
 
-  type State = StateFor[Any]
-
-  case class StateFor[+A](value: A, renderFn: () => ReactElement) {
+  case class StateFor[A](value: A, renderFn: () => ReactElement) {
     @inline def render: ReactElement = renderFn()
   }
 
-  type SetState        = State => Callback
-  type SetStateFor[-A] = StateFor[A] => Callback
+  type SetStateFor[A] = StateFor[A] => Callback
 
   def selfManaged[S, A](initial   : A,
                         convInput : S => A,
@@ -60,7 +57,7 @@ object SelfManagedStateTest extends TestSuite {
   @Lenses
   case class TopLevelState(firstName: StateFor[String], lastName: StateFor[String])
 
-  def initTopLevelState($: DuringCallbackU[Unit, TopLevelState, Any], firstName: String, lastName: String): TopLevelState =
+  def initTopLevelState($: AnyInitializing[Unit, TopLevelState], firstName: String, lastName: String): TopLevelState =
     TopLevelState(
       selfManagedTextEditor(firstName, $ _setStateL TopLevelState.firstName),
       selfManagedTextEditor(lastName,  $ _setStateL TopLevelState.lastName))

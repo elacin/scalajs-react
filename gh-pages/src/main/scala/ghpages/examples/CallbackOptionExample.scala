@@ -37,7 +37,7 @@ object CallbackOptionExample {
 
   def initState = State((OuterX - InnerSize) / 2, (OuterY - InnerSize) / 2)
 
-  val OuterRef = Ref("o")
+  val OuterRef = Ref[TopNode]("o")
 
   val OuterDiv =
     <.div(

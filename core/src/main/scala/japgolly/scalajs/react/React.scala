@@ -176,11 +176,11 @@ object CompScope {
     def isMounted(): Boolean = js.native
   }
 
-  trait HasProps[+Props] extends Object {
+  trait HasProps[Props] extends Object {
     @JSName("props") private[react] def _props: WrapObj[Props] with PropsMixedIn = js.native
   }
 
-  trait HasState[+State] extends Object {
+  trait HasState[State] extends Object {
     @JSName("state") private[react] def _state: WrapObj[State] = js.native
   }
 
@@ -190,16 +190,16 @@ object CompScope {
     @JSName("setState") private[react] def _modState(s: js.Function1[WrapObj[State], WrapObj[State]], callback: UndefOr[JFn]): Unit = js.native
   }
 
-  trait HasBackend[+Backend] extends Object {
+  trait HasBackend[Backend] extends Object {
     def backend: Backend = js.native
   }
 
-  trait CanGetInitialState[-Props, +State] extends Object {
+  trait CanGetInitialState[Props, State] extends Object {
     @JSName("getInitialState") private[react] def _getInitialState(s: WrapObj[Props]): WrapObj[State] = js.native
   }
 
   /** Functions available to components when they're mounted. */
-  trait Mounted[+Node <: TopNode] extends Object {
+  trait Mounted[Node <: TopNode] extends Object {
     def refs: RefsObject = js.native
 
     /** Can be invoked on any mounted component in order to obtain a reference to its rendered DOM node. */
@@ -217,7 +217,13 @@ object CompScope {
   trait WriteDirect   extends Object
   trait WriteCallback extends Object
 
-  trait AnyUnmounted[Props, State, +Backend]
+  trait AnyInitializing[Props, State]
+    extends HasProps[Props]
+    with CanSetState[State]
+    with ReadDirect
+    with WriteCallback
+
+  trait AnyUnmounted[Props, State, Backend]
     extends AlwaysAvailable
        with HasProps[Props]
        with CanSetState[State]
@@ -225,7 +231,7 @@ object CompScope {
        with HasBackend[Backend]
        // prohibits: IsMounted
 
-  trait AnyMounted[Props, State, +Backend, +Node <: TopNode]
+  trait AnyMounted[Props, State, Backend, Node <: TopNode]
     extends AnyUnmounted[Props, State, Backend]
        with Mounted[Node]
        with ReactComponentTypeAuxJ[Props, State, Backend, Node]
@@ -235,17 +241,17 @@ object CompScope {
        with WriteCallback
 
   /** Type of an unmounted component's `this` scope, as available within lifecycle methods. */
-  trait DuringCallbackU[Props, State, +Backend]
+  trait DuringCallbackU[Props, State, Backend]
     extends AnyUnmounted[Props, State, Backend]
        with AnyDuringCallback
 
   /** Type of a mounted component's `this` scope, as available within lifecycle methods. */
-  trait DuringCallbackM[Props, State, +Backend, +Node <: TopNode]
+  trait DuringCallbackM[Props, State, Backend, Node <: TopNode]
     extends AnyMounted[Props, State, Backend, Node]
        with AnyDuringCallback
 
   /** Type of a component's `this` scope during componentWillUpdate. */
-  trait WillUpdate[Props, +State, +Backend, +Node <: TopNode]
+  trait WillUpdate[Props, State, Backend, Node <: TopNode]
     extends AlwaysAvailable
        with HasProps[Props]
        with HasState[State]
@@ -315,19 +321,19 @@ trait ReactComponentC_ extends JFn
 trait ReactComponentU_ extends ReactElement
 
 /** A mounted component. Not guaranteed to have been created by Scala, could be a React addon. */
-trait ReactComponentM_[+Node <: TopNode]
+trait ReactComponentM_[Node <: TopNode]
   extends ReactComponentU_
      with Mounted[Node]
 
 /** The underlying function that creates a Scala-based React component instance. */
-trait ReactComponentCU[Props, State, +Backend, +Node <: TopNode]
+trait ReactComponentCU[Props, State, Backend, Node <: TopNode]
   extends ReactComponentC_
      with ReactComponentTypeAuxJ[Props, State, Backend, Node] {
   def apply(props: WrapObj[Props], children: ReactNode*): ReactComponentU[Props, State, Backend, Node] = js.native
 }
 
 /** An unmounted Scala component. */
-trait ReactComponentU[Props, State, +Backend, +Node <: TopNode]
+trait ReactComponentU[Props, State, Backend, Node <: TopNode]
   extends ReactComponentU_
      with AnyUnmounted[Props, State, Backend]
      with ReactComponentTypeAuxJ[Props, State, Backend, Node]
@@ -335,31 +341,31 @@ trait ReactComponentU[Props, State, +Backend, +Node <: TopNode]
      with WriteDirect
 
 /** A mounted Scala component. */
-trait ReactComponentM[Props, State, +Backend, +Node <: TopNode]
+trait ReactComponentM[Props, State, Backend, Node <: TopNode]
   extends ReactComponentU[Props, State, Backend, Node]
      with ReactComponentM_[Node]
      with AnyMounted[Props, State, Backend, Node]
 
-trait ReactComponentSpec[Props, State, +Backend, +Node <: TopNode] extends Object with ReactComponentTypeAuxJ[Props, State, Backend, Node]
+trait ReactComponentSpec[Props, State, Backend, Node <: TopNode] extends Object with ReactComponentTypeAuxJ[Props, State, Backend, Node]
 
 /**
  * A component created via [[React.createClass]].
  */
-trait ReactClass[Props, State, +Backend, +Node <: TopNode] extends Object with ReactComponentTypeAuxJ[Props, State, Backend, Node]
+trait ReactClass[Props, State, Backend, Node <: TopNode] extends Object with ReactComponentTypeAuxJ[Props, State, Backend, Node]
 
 // =====================================================================================================================
 
-trait JsComponentType[Props <: js.Any, State <: js.Any, +Node <: TopNode] extends Object
+trait JsComponentType[Props <: js.Any, State <: js.Any, Node <: TopNode] extends Object
 
-trait JsComponentC[Props <: js.Any, State <: js.Any, +Node <: TopNode] extends ReactComponentC_ with JsComponentType[Props, State, Node] {
+trait JsComponentC[Props <: js.Any, State <: js.Any, Node <: TopNode] extends ReactComponentC_ with JsComponentType[Props, State, Node] {
   def apply(props: Props, children: ReactNode*): JsComponentU[Props, State, Node] = js.native
 }
 
-trait JsComponentU[Props <: js.Any, State <: js.Any, +Node <: TopNode]
+trait JsComponentU[Props <: js.Any, State <: js.Any, Node <: TopNode]
   extends ReactComponentU_
   with JsComponentType[Props, State, Node]
 
-trait JsComponentM[Props <: js.Any, State <: js.Any, +Node <: TopNode]
+trait JsComponentM[Props <: js.Any, State <: js.Any, Node <: TopNode]
   extends JsComponentU[Props, State, Node]
   with Mounted[Node] with ReactComponentM_[Node] {
   def props: Props = js.native

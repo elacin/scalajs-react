@@ -5,16 +5,16 @@ import Internal._
 import CompScope._
 import macros.CompBuilderMacros
 
-abstract class LifecycleInput[P, S, +$ <: HasProps[P] with HasState[S]] {
+abstract class LifecycleInput[P, S, $ <: HasProps[P] with HasState[S]] {
   val $: $
   @inline final def component: $ = $
   @inline final def currentProps: P = $._props.v
   @inline final def currentState: S = $._state.v
 }
-case class ComponentWillUpdate      [P, S, +B, +N <: TopNode]($: WillUpdate[P, S, B, N],      nextProps: P, nextState: S) extends LifecycleInput[P, S, WillUpdate[P, S, B, N]]
-case class ComponentDidUpdate       [P, S, +B, +N <: TopNode]($: DuringCallbackM[P, S, B, N], prevProps: P, prevState: S) extends LifecycleInput[P, S, DuringCallbackM[P, S, B, N]]
-case class ShouldComponentUpdate    [P, S, +B, +N <: TopNode]($: DuringCallbackM[P, S, B, N], nextProps: P, nextState: S) extends LifecycleInput[P, S, DuringCallbackM[P, S, B, N]]
-case class ComponentWillReceiveProps[P, S, +B, +N <: TopNode]($: DuringCallbackM[P, S, B, N], nextProps: P) extends LifecycleInput[P, S, DuringCallbackM[P, S, B, N]]
+case class ComponentWillUpdate      [P, S, B, N <: TopNode]($: WillUpdate[P, S, B, N],      nextProps: P, nextState: S) extends LifecycleInput[P, S, WillUpdate[P, S, B, N]]
+case class ComponentDidUpdate       [P, S, B, N <: TopNode]($: DuringCallbackM[P, S, B, N], prevProps: P, prevState: S) extends LifecycleInput[P, S, DuringCallbackM[P, S, B, N]]
+case class ShouldComponentUpdate    [P, S, B, N <: TopNode]($: DuringCallbackM[P, S, B, N], nextProps: P, nextState: S) extends LifecycleInput[P, S, DuringCallbackM[P, S, B, N]]
+case class ComponentWillReceiveProps[P, S, B, N <: TopNode]($: DuringCallbackM[P, S, B, N], nextProps: P) extends LifecycleInput[P, S, DuringCallbackM[P, S, B, N]]
 
 object ReactComponentB {
 
@@ -37,8 +37,8 @@ object ReactComponentB {
   implicit def defaultTopNode      [p,s,b](x: PSBR[p, s, b])                              = x.domType[TopNode]
   implicit def defaultPropsRequired[P,S,B,N<:TopNode,X <% ReactComponentB[P,S,B,N]](x: X) = x.propsRequired
 
-  type InitStateFn[P, S] = DuringCallbackU[P, S, Any] => CallbackTo[S]
-  type RenderFn[P, S, -B] = DuringCallbackU[P, S, B] => ReactElement
+  type InitStateFn[P, S] = AnyInitializing[P, S] => CallbackTo[S]
+  type RenderFn[P, S, B] = DuringCallbackU[P, S, B] => ReactElement
 
   // ===================================================================================================================
   // Convenience
@@ -57,8 +57,8 @@ object ReactComponentB {
   final class P[Props] private[ReactComponentB](name: String) {
 
     // getInitialState is how it's named in React
-    def getInitialState  [State](f: DuringCallbackU[Props, State, Any] => State)             = getInitialStateCB[State]($ => CallbackTo(f($)))
-    def getInitialStateCB[State](f: DuringCallbackU[Props, State, Any] => CallbackTo[State]) = new PS[Props, State](name, f)
+    def getInitialState  [State](f: AnyInitializing[Props, State] => State)             = getInitialStateCB[State]($ => CallbackTo(f($)))
+    def getInitialStateCB[State](f: AnyInitializing[Props, State] => CallbackTo[State]) = new PS[Props, State](name, f)
 
     // More convenient methods that don't need the full CompScope
     def initialState    [State](s: => State                  ) = initialStateCB(CallbackTo(s))
@@ -361,7 +361,7 @@ final class ReactComponentB[P,S,B,N <: TopNode](val name: String,
       }
       spec.updateDynamic("componentWillMount")(componentWillMount2: ThisFunction)
 
-      val initStateFn: DuringCallbackU[P, S, B] => WrapObj[S] = $ => WrapObj(initF($).runNow())
+      val initStateFn: AnyInitializing[P, S] => WrapObj[S] = $ => WrapObj(initF($).runNow())
       spec.updateDynamic("getInitialState")(initStateFn: ThisFunction)
 
       lc.getDefaultProps.flatMap(_.toJsCallback).foreach(f => spec.updateDynamic("getDefaultProps")(f))

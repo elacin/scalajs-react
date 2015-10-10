@@ -27,16 +27,16 @@ object LogLifecycle {
   private[this] def logP[P <: Product](m: String, c: P => js.Any, extra: P => Seq[js.Any]) = (p: P) =>
     logc(m, c(p), extra(p): _*)
 
-  private[this] def logCWU[P, S](m: String) =
-    logP[ComponentWillUpdate[P, S, Any, TopNode]](m, _.$,
+  private[this] def logCWU[P, S, B, N <: TopNode](m: String) =
+    logP[ComponentWillUpdate[P, S, B, N]](m, _.$,
       i => fmt("Next props", i.nextProps) ++ fmt("Next state", i.nextState))
 
-  private[this] def logCDU[P, S](m: String) =
-    logP[ComponentDidUpdate[P, S, Any, TopNode]](m, _.$,
+  private[this] def logCDU[P, S, B, N <: TopNode](m: String) =
+    logP[ComponentDidUpdate[P, S, B, N]](m, _.$,
       i => fmt("Prev props", i.prevProps) ++ fmt("Prev state", i.prevState))
 
-  private[this] def logCWRP[P, S](m: String) =
-    logP[ComponentWillReceiveProps[P, S, Any, TopNode]](m, _.$,
+  private[this] def logCWRP[P, S, B, N <: TopNode](m: String) =
+    logP[ComponentWillReceiveProps[P, S, B, N]](m, _.$,
       i => fmt("Next props", i.nextProps))
 
   def short[P, S, B, N <: TopNode] = (rc: ReactComponentB[P, S, B, N]) => {
@@ -54,8 +54,8 @@ object LogLifecycle {
     rc.componentWillMount       (log1 (h("componentWillMount")))
       .componentDidMount        (log1 (h("componentDidMount")))
       .componentWillUnmount     (log1 (h("componentWillUnmount")))
-      .componentWillUpdate      (logCWU[P,S](h("componentWillUpdate")))
-      .componentDidUpdate       (logCDU[P,S](h("componentDidUpdate")))
-      .componentWillReceiveProps(logCWRP[P,S](h("componentWillReceiveProps")))
+      .componentWillUpdate      (logCWU(h("componentWillUpdate")))
+      .componentDidUpdate       (logCDU(h("componentDidUpdate")))
+      .componentWillReceiveProps(logCWRP(h("componentWillReceiveProps")))
   }
 }

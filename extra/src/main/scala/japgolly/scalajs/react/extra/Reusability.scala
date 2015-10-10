@@ -246,7 +246,7 @@ object Reusability {
     ReusabilityOverlay.install[P, S, B, N](DefaultReusabilityOverlay.defaults)
 }
 
-case class ShouldComponentUpdateResult[P: Reusability, S: Reusability, +B, +N <: TopNode]($: DuringCallbackM[P, S, B, N], nextProps: P, nextState: S) {
+case class ShouldComponentUpdateResult[P: Reusability, S: Reusability, B, N <: TopNode]($: DuringCallbackM[P, S, B, N], nextProps: P, nextState: S) {
   val updateProps: Boolean = $.props ~/~ nextProps
   val updateState: Boolean = $.state ~/~ nextState
   val update     : Boolean = updateProps || updateState
