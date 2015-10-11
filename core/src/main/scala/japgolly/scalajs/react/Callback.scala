@@ -239,6 +239,12 @@ final class CallbackTo[A] private[react] (private[CallbackTo] val f: () => A) ex
   @inline def <<[B](runBefore: CallbackTo[B]): CallbackTo[A] =
     runBefore >> this
 
+  def zip[B](b: CallbackTo[B]): CallbackTo[(A, B)] =
+    for {
+      a <- this
+      b <- b
+    } yield (a, b)
+
   /**
    * Discard the value produced by this callback.
    */

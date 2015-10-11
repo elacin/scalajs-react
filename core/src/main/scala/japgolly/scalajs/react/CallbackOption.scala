@@ -140,6 +140,12 @@ final class CallbackOption[A](private val cbfn: () => Option[A]) extends AnyVal 
   def withFilter(condition: A => Boolean): CallbackOption[A] =
     filter(condition)
 
+  def zip[B](b: CallbackOption[B]): CallbackOption[(A, B)] =
+    for {
+      a <- this
+      b <- b
+    } yield (a, b)
+
   /**
    * Sequence a callback to run after this, discarding any value produced by this.
    */
