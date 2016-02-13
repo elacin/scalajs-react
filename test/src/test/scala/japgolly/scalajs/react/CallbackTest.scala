@@ -72,7 +72,34 @@ object CallbackTest extends TestSuite {
     }
     'map_makes_sense {
       val cb1 = Callback.info("hola")
-      "Callback(Callback)" - assert(compileError("(cb1 map (_ => cb1)): Callback").msg.nonEmpty)
+
+      "Not throw away callbacks" -
+        assert(compileError("(cb1 map (_ => cb1)): Callback").msg.nonEmpty)
+
+      "Convert Callback[Unit]" - {
+        val cb1: CallbackTo[Unit] =
+          CallbackTo("1") map println
+        val cb2: Callback =
+          cb1
+      }
+
+      "Convert CallbackOption[Unit]" -
+        assertCompiles(CallbackOption[String](CallbackTo(Some("1"))) map println: Callback)
+
+      "Convert CallbackOption[Unit]" - {
+        val cbo1: CallbackOption[String] =
+          CallbackOption(CallbackTo(Some("1")))
+
+        val cbo2: CallbackOption[Unit] =
+          cbo1 map println
+        val cbo3: CallbackOption[Empty] =
+          cbo1 map ((s: String) => println(s))
+
+        val cb1: Callback =
+          cbo2
+        val cb2: Callback =
+          cbo3
+      }
     }
   }
 }

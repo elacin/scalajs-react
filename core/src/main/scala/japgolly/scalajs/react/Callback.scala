@@ -171,6 +171,9 @@ object Callback {
 // =====================================================================================================================
 
 object CallbackTo {
+  @inline implicit def UpgradeUnit(cbu: CallbackTo[Unit]): Callback =
+    cbu.void
+
   @inline def apply[A](f: => A): CallbackTo[A] =
     new CallbackTo(() => f)
 

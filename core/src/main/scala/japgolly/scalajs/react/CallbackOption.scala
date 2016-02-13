@@ -103,6 +103,9 @@ object CallbackOption {
   @inline def sequenceO[A](oca: => Option[CallbackOption[A]]): CallbackOption[A] =
     traverseO(oca)(identity)
 
+  implicit def unitToCallback(co: CallbackOption[Unit]): Callback =
+    co.get.void
+
   implicit def emptyToCallback(co: CallbackOption[Empty]): Callback =
     co.toCallback
 

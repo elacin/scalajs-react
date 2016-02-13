@@ -11,6 +11,7 @@ package object react extends ReactEventAliases {
 
   sealed trait Empty
   val Empty: Empty = new Empty{}
+  implicit def fromUnit(u: Unit): Empty = Empty
 
   type Callback  = CallbackTo[Empty]
   type CallbackB = CallbackTo[Boolean]
