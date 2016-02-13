@@ -6,17 +6,17 @@ import scala.collection.generic.CanBuildFrom
 // TODO Document CallbackOption
 
 object CallbackOption {
-  private[CallbackOption] val someUnit: Option[Unit] = Some(())
+  private[CallbackOption] val someEmpty: Option[Empty] = Some(Empty)
 
   def apply[A](cb: CallbackTo[Option[A]]): CallbackOption[A] =
     new CallbackOption(cb.toScalaFn)
 
   @deprecated("Use CallbackOption.pass instead.", "0.10.1")
-  def empty: CallbackOption[Unit] =
+  def empty: CallbackOption[Empty] =
     pass
 
-  def pass: CallbackOption[Unit] =
-    CallbackOption(CallbackTo pure someUnit)
+  def pass: CallbackOption[Empty] =
+    CallbackOption(CallbackTo pure someEmpty)
 
   def fail[A]: CallbackOption[A] =
     CallbackOption(CallbackTo pure None)
@@ -42,10 +42,10 @@ object CallbackOption {
   def liftOptionLikeCallback[O[_], A](oa: => O[CallbackTo[A]])(implicit O: OptionLike[O]): CallbackOption[A] =
     liftOptionCallback(O toOption oa)
 
-  def require(condition: => Boolean): CallbackOption[Unit] =
-    CallbackOption(CallbackTo(if (condition) someUnit else None))
+  def require(condition: => Boolean): CallbackOption[Empty] =
+    CallbackOption(CallbackTo(if (condition) someEmpty else None))
 
-  def unless(condition: => Boolean): CallbackOption[Unit] =
+  def unless(condition: => Boolean): CallbackOption[Empty] =
     require(!condition)
 
   def matchPF[A, B](a: => A)(pf: PartialFunction[A, B]): CallbackOption[B] =
@@ -103,10 +103,10 @@ object CallbackOption {
   @inline def sequenceO[A](oca: => Option[CallbackOption[A]]): CallbackOption[A] =
     traverseO(oca)(identity)
 
-  implicit def toCallback(co: CallbackOption[Unit]): Callback =
+  implicit def emptyToCallback(co: CallbackOption[Empty]): Callback =
     co.toCallback
 
-  implicit def fromCallback(c: Callback): CallbackOption[Unit] =
+  implicit def fromCallback(c: Callback): CallbackOption[Empty] =
     c.toCBO
 
   def keyCodeSwitch[A](e       : ReactKeyboardEvent,
@@ -158,7 +158,7 @@ object CallbackOption {
  * For a more generic (i.e. beyond Option) or comprehensive monad transformer use Scalaz or similar.
  */
 final class CallbackOption[A](private val cbfn: () => Option[A]) extends AnyVal {
-  import CallbackOption.someUnit
+  import CallbackOption.someEmpty
 
   def get: CallbackTo[Option[A]] =
     CallbackTo lift cbfn
@@ -166,15 +166,15 @@ final class CallbackOption[A](private val cbfn: () => Option[A]) extends AnyVal 
   def getOrElse(default: => A): CallbackTo[A] =
     get.map(_ getOrElse default)
 
-  def toCallback(implicit ev: A =:= Unit): Callback =
+  def toCallback(implicit ev: A =:= Empty): Callback =
     get.void
 
   def toCallbackB: CallbackB =
     get.map(_.isDefined)
 
-  def unary_!(implicit ev: A =:= Unit): CallbackOption[Unit] =
+  def unary_!(implicit ev: A =:= Empty): CallbackOption[Empty] =
     CallbackOption(get.map {
-      case None    => someUnit
+      case None    => someEmpty
       case Some(_) => None
     })
 
@@ -246,8 +246,8 @@ final class CallbackOption[A](private val cbfn: () => Option[A]) extends AnyVal 
   /**
    * Discard the value produced by this callback.
    */
-  def void: CallbackOption[Unit] =
-    map(_ => ())
+  def void: CallbackOption[Empty] =
+    map(_ => Empty)
 
   /**
    * Discard the value produced by this callback.
@@ -269,9 +269,9 @@ final class CallbackOption[A](private val cbfn: () => Option[A]) extends AnyVal 
   @inline def |(tryNext: CallbackOption[A]): CallbackOption[A] =
     orElse(tryNext)
 
-  def &&[B](b: CallbackOption[B]): CallbackOption[Unit] =
+  def &&[B](b: CallbackOption[B]): CallbackOption[Empty] =
     this >> b.void
 
-  def ||[B](b: CallbackOption[B]): CallbackOption[Unit] =
+  def ||[B](b: CallbackOption[B]): CallbackOption[Empty] =
     void | b.void
 }

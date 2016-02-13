@@ -20,22 +20,39 @@ object Callback {
   final class ResultGuard[A] private[Callback]()
   object ResultGuard {
     final class Proof[A] private[Callback]()
-    object Proof {
+
+    trait ProofLower {
+      @deprecated("Use Callback.ignoreResult if that's what you want to do", "2016-02-13")
+      @inline implicit def allowAnythingElse[A]: Proof[A] = null
+    }
+
+    object Proof extends ProofLower {
+      @inline implicit val allowUnit: Proof[Unit] = null
+
       implicit def preventCallback1[A]: Proof[CallbackTo[A]] = ???
       implicit def preventCallback2[A]: Proof[CallbackTo[A]] = ???
-      @inline implicit def allowAnythingElse[A]: Proof[A] = null
     }
     @inline implicit def apply[A: Proof]: ResultGuard[A] = null
   }
 
-  @inline def apply[U: ResultGuard](f: => U): Callback =
-    CallbackTo(f: Unit)
+  @inline def apply[U: ResultGuard](u: => U): Callback =
+    ignoreResult(u)
 
-  @inline def lift(f: () => Unit): Callback =
-    CallbackTo lift f
+  @inline def lift(u: () => Unit): Callback =
+    CallbackTo lift (() => {u(); Empty})
+
+  @inline def ignoreResult[U](u: => U): Callback =
+    CallbackTo {
+      u: Unit
+      Empty
+    }
 
   /** A callback that does nothing. */
   val empty: Callback =
+    CallbackTo pure Empty
+
+  /** A callback that does nothing. */
+  private [react] val emptyUnit: CallbackTo[Unit] =
     CallbackTo.pure(())
 
   /**
@@ -359,7 +376,7 @@ final class CallbackTo[A] private[react] (private[CallbackTo] val f: () => A) ex
    * Discard the value produced by this callback.
    */
   def void: Callback =
-    ret(())
+    ret(Empty)
 
   /**
    * Discard the value produced by this callback.

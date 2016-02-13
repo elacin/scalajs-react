@@ -79,7 +79,7 @@ object ReactComponentB {
     def initialState_P  [State](f: Props => State            ) = getInitialStateCB[State]($ => CallbackTo(f($.props)))
     def initialStateCB_P[State](f: Props => CallbackTo[State]) = getInitialStateCB[State]($ => f($.props))
 
-    def stateless = initialStateCB(Callback.empty)
+    def stateless = initialStateCB(Callback.emptyUnit)
   }
 
   // ===================================================================================================================

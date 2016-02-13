@@ -13,7 +13,7 @@ import Implicits._
 sealed trait DomCallbackResult[A]
 object DomCallbackResult {
   def force[A] = null.asInstanceOf[DomCallbackResult[A]]
-  @inline implicit def unit = force[Unit]
+  @inline implicit def empty = force[Empty]
   @inline implicit def boolean = force[Boolean]
   @inline implicit def undefOrBoolean = force[js.UndefOr[Boolean]]
 }
@@ -40,7 +40,7 @@ object Extra {
       attr --> Callback(o.foreach(callback)(_.runNow()))
 
     def ==>?[O[_], N <: dom.Node, E <: SyntheticEvent[N]](eventHandler: E => O[Callback])(implicit o: OptionLike[O]): TagMod =
-      attr.==>[Unit, N, E](e => Callback(o.foreach(eventHandler(e))(_.runNow())))
+      attr.==>[Empty, N, E](e => Callback(o.foreach(eventHandler(e))(_.runNow())))
   }
 
   final class BooleanExt(private val b: Boolean) extends AnyVal {

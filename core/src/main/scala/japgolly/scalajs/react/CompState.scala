@@ -146,8 +146,8 @@ object CompState {
     override type This[T] <: WriteCallbackOps[T]
     final override type WriteFutureAccess[S] = WriteCallbackFutureOps[S]
     final override type WriteResult = Callback
-    final override def setState  (s: S            , cb: Callback = Callback.empty): Callback = CallbackTo(a.setState($)(s, cb))
-    final override def modState  (f: S => S       , cb: Callback = Callback.empty): Callback = CallbackTo(a.modState($)(f, cb))
+    final override def setState  (s: S            , cb: Callback = Callback.empty): Callback = Callback(a.setState($)(s, cb))
+    final override def modState  (f: S => S       , cb: Callback = Callback.empty): Callback = Callback(a.modState($)(f, cb))
     final override def setStateCB(s: CallbackTo[S], cb: Callback = Callback.empty): Callback = s >>= (setState(_, cb))
   }
 

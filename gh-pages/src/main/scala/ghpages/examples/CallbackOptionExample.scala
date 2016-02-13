@@ -69,7 +69,7 @@ object CallbackOptionExample {
 
     def handleKey(e: ReactKeyboardEvent): Callback = {
 
-      def plainKey: CallbackOption[Unit] =             // CallbackOption will stop if a key isn't matched
+      def plainKey: CallbackOption[Empty] =            // CallbackOption will stop if a key isn't matched
         CallbackOption.keyCodeSwitch(e) {
           case KeyCode.Up    => move(0, -1)
           case KeyCode.Down  => move(0,  1)
@@ -77,7 +77,7 @@ object CallbackOptionExample {
           case KeyCode.Right => move( 1, 0)
         }
 
-      def ctrlKey: CallbackOption[Unit] =              // Like above but if ctrlKey is pressed
+      def ctrlKey: CallbackOption[Empty] =             // Like above but if ctrlKey is pressed
         CallbackOption.keyCodeSwitch(e, ctrlKey = true) {
           case KeyCode.Up    => move(0, -OuterY)
           case KeyCode.Down  => move(0,  OuterY)

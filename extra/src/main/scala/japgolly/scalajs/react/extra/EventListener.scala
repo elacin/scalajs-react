@@ -34,7 +34,7 @@ object EventListener {
       OnUnmount.install[P,S,B,N] andThen (_.componentDidMount { $ =>
         val et = target($)
         val fe = listener($)
-        val f: js.Function1[E, Unit] = (e: E) => fe(e).runNow()
+        val f: js.Function1[E, Empty] = (e: E) => fe(e).runNow()
         val add = Callback(et.addEventListener(eventType, f, useCapture))
         val del = Callback(et.removeEventListener(eventType, f, useCapture))
         add >> $.backend.onUnmount(del)

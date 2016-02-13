@@ -38,11 +38,11 @@ private[react] object ScalazReactState {
     def _runStateF[I, M[_], A](f: I => ReactST[M, S, A], cb: I => Callback)(implicit M: M ~> CallbackTo, N: Monad[M], F: ChangeFilter[S]): I => W[A] =
       i => runStateF(f(i) addCallback cb(i))
 
-    def modStateF(f: S => S, cb: Callback = Callback.empty)(implicit F: ChangeFilter[S]): W[Unit] =
+    def modStateF(f: S => S, cb: Callback = Callback.empty)(implicit F: ChangeFilter[S]): W[Empty] =
       $.state >>= (s1 =>
         F(s1, f(s1), Callback.empty, $.setState(_, cb)))
 
-    @inline def _modStateF[I](f: I => S => S, cb: Callback = Callback.empty)(implicit F: ChangeFilter[S]): I => W[Unit] =
+    @inline def _modStateF[I](f: I => S => S, cb: Callback = Callback.empty)(implicit F: ChangeFilter[S]): I => W[Empty] =
       i => modStateF(f(i), cb)
   }
 

@@ -21,9 +21,10 @@ object CallbackTest extends TestSuite {
     assert(j == e3)
   }
 
+  def assertCompiles[A](f: => A): Unit = ()
+
   override def tests = TestSuite {
     'guard {
-      def assertCompiles[A](f: => A): Unit = ()
       def assertFails(f: CompileError): Unit = assert(f.msg contains "which will discard without running it")
       def cb = Callback.empty
       def cbI = CallbackTo(3)
@@ -68,6 +69,10 @@ object CallbackTest extends TestSuite {
 
       val x = CallbackTo(Callback.empty).flatten
       val y: Callback = x
+    }
+    'map_makes_sense {
+      val cb1 = Callback.info("hola")
+      "Callback(Callback)" - assert(compileError("(cb1 map (_ => cb1)): Callback").msg.nonEmpty)
     }
   }
 }

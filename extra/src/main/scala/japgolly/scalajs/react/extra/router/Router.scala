@@ -99,7 +99,7 @@ final class RouterLogic[Page](val baseUrl: BaseUrl, cfg: RouterConfig[Page]) ext
     log(s"Parsed $path to $parsed.") >> cmd
   }
 
-  def redirectCmd(p: Path, m: Redirect.Method): RouteCmd[Unit] = m match {
+  def redirectCmd(p: Path, m: Redirect.Method): RouteCmd[Empty] = m match {
     case Redirect.Push    => PushState   (p.abs)
     case Redirect.Replace => ReplaceState(p.abs)
   }
@@ -124,16 +124,17 @@ final class RouterLogic[Page](val baseUrl: BaseUrl, cfg: RouterConfig[Page]) ext
   private def cmdOrPure[A](e: Either[RouteCmd[A], A]): RouteCmd[A] =
     e.fold(identity, Return(_))
 
+  //todo!
   def interpret[A](r: RouteCmd[A]): CallbackTo[A] = {
     @inline def hs = js.Dynamic.literal()
     @inline def ht = ""
     @inline def h = window.history
     r match {
-      case PushState(url)    => CallbackTo(h.pushState   (hs, ht, url.value)) << logger(s"PushState: [${url.value}]")
-      case ReplaceState(url) => CallbackTo(h.replaceState(hs, ht, url.value)) << logger(s"ReplaceState: [${url.value}]")
-      case BroadcastSync     => broadcast(())                                 << logger("Broadcasting sync request.")
+//      case PushState(url)    => CallbackTo(h.pushState   (hs, ht, url.value)) << logger(s"PushState: [${url.value}]")
+//      case ReplaceState(url) => CallbackTo(h.replaceState(hs, ht, url.value)) << logger(s"ReplaceState: [${url.value}]")
+//      case BroadcastSync     => broadcast(())                                 << logger("Broadcasting sync request.")
       case Return(a)         => CallbackTo.pure(a)
-      case Log(msg)          => logger(msg())
+//      case Log(msg)          => logger(msg())
       case Sequence(a, b)    => a.foldLeft[CallbackTo[_]](Callback.empty)(_ >> interpret(_)) >> interpret(b)
     }
   }
@@ -141,7 +142,7 @@ final class RouterLogic[Page](val baseUrl: BaseUrl, cfg: RouterConfig[Page]) ext
   def render(r: Resolution): ReactElement =
     cfg.renderFn(ctl, r)
 
-  def setPath(path: Path): RouteCmd[Unit] =
+  def setPath(path: Path): RouteCmd[Empty] =
     log(s"Set route to $path.") >>
       PushState(path.abs) >> BroadcastSync
 

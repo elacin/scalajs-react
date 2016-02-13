@@ -22,7 +22,7 @@ object ExtrasExamples {
           i <- CallbackTo(js.timers.setInterval(1.second)(tick.runNow()))
           c  = Callback(js.timers.clearInterval(i))
           _ <- onUnmount(c)                                            // Use onUnmount here
-        } yield ()
+        } yield Empty
     }
 
 

@@ -21,10 +21,10 @@ private[react] object ScalazReactExtra {
     import Listenable._
     import ScalazReact._
 
-    def installS[P, S, B <: OnUnmount, N <: TopNode, M[_], A](f: P => Listenable[A], g: A => ReactST[M, S, Unit])(implicit M: M ~> CallbackTo) =
+    def installS[P, S, B <: OnUnmount, N <: TopNode, M[_], A](f: P => Listenable[A], g: A => ReactST[M, S, Empty])(implicit M: M ~> CallbackTo) =
       install[P, S, B, N, A](f, $ => a => $.runState(g(a)))
   
-    def installSF[P, S, B <: OnUnmount, N <: TopNode, M[_], A](f: P => Listenable[A], g: A => ReactST[M, S, Unit])(implicit M: M ~> CallbackTo, F: ChangeFilter[S]) =
+    def installSF[P, S, B <: OnUnmount, N <: TopNode, M[_], A](f: P => Listenable[A], g: A => ReactST[M, S, Empty])(implicit M: M ~> CallbackTo, F: ChangeFilter[S]) =
       install[P, S, B, N, A](f, $ => a => $.runStateF(g(a)))
   }
 }

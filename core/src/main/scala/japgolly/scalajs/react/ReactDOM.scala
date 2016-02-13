@@ -89,7 +89,7 @@ trait ReactDOM extends Object {
    * the future, it may be possible to insert a component to an existing DOM node without overwriting
    * the existing children.
    */
-  def render[P,S,B,N <: TopNode](component: ReactComponentU[P,S,B,N], container: dom.Node, callback: ThisFunction0[ReactComponentM[P,S,B,N], Unit]): ReactComponentM[P,S,B,N] = js.native
+  def render[P,S,B,N <: TopNode](component: ReactComponentU[P,S,B,N], container: dom.Node, callback: ThisFunction0[ReactComponentM[P,S,B,N], Empty]): ReactComponentM[P,S,B,N] = js.native
 
   /**
    * Remove a mounted React component from the DOM and clean up its event handlers and state. If no component was

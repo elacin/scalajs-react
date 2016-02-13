@@ -9,7 +9,10 @@ package object react extends ReactEventAliases {
 
   type TopNode = dom.Element
 
-  type Callback  = CallbackTo[Unit]
+  sealed trait Empty
+  val Empty: Empty = new Empty{}
+
+  type Callback  = CallbackTo[Empty]
   type CallbackB = CallbackTo[Boolean]
 
   @deprecated("Use CompState.AccessD.", "0.10.2")
@@ -116,7 +119,7 @@ package object react extends ReactEventAliases {
      * Can be invoked on any mounted component when you know that some deeper aspect of the component's state has
      * changed without using this.setState().
      */
-    @inline def forceUpdateCB: Callback = CallbackTo(forceUpdate())
+    @inline def forceUpdateCB: Callback = Callback(forceUpdate())
   }
   @inline implicit final class ReactExt_MountedCB[N <: TopNode](private val c: Mounted[N] with WriteCallback) extends AnyVal {
     @inline private def direct = new ReactExt_MountedD(c.asInstanceOf[Mounted[N] with WriteDirect])

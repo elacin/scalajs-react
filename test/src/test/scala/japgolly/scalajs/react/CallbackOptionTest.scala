@@ -18,7 +18,7 @@ object CallbackOptionTest extends TestSuite {
         _ <- Callback(cp2 = true).toCBO
         _ <- require(1 == 1)
         _ <- Callback(cp2 = true).toCBO
-      } yield ()
+      } yield Empty
       co.runNow()
       assert(cp1, !cp2)
     }
